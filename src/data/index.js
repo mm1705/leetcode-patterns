@@ -1826,7 +1826,7 @@ export default [
     url: 'https://leetcode.com/problems/longest-word-in-dictionary/',
     pattern: 'Trie',
     difficulty: 'Easy',
-    companies: ['Goldman Sachs', 'Google',],
+    companies: ['Goldman Sachs', 'Google'],
   },
   {
     id: 165,
@@ -1834,7 +1834,7 @@ export default [
     url: 'https://leetcode.com/problems/index-pairs-of-a-string/',
     pattern: 'Trie',
     difficulty: 'Easy',
-    companies: ['Amazon',],
+    companies: ['Amazon'],
   },
   {
     id: 166,
