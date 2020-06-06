@@ -3,8 +3,16 @@
     justify-content: center;
   }
 
-  thead > tr:first-child {
-    display: none;
+  thead {
+    > tr:first-child {
+      display: none;
+    }
+
+    > tr th {
+      background: white;
+      position: sticky;
+      top: 0;
+    }
   }
 
   .nav-link {
