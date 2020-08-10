@@ -31,8 +31,13 @@
     background-color: #d9534f;
   }
 
-  .companies {
+  .companies,
+  .patterns {
     justify-content: space-evenly;
     margin: 0;
+  }
+
+  .react-toggle {
+    top: 7px;
   }
 }

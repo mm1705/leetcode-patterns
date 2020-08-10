@@ -6,6 +6,7 @@ import {
   Badge,
   NavLink,
 } from 'reactstrap';
+import Toggle from 'react-toggle';
 import ReactTooltip from 'react-tooltip';
 import { useTable, useFilters, useSortBy } from 'react-table';
 import { FaQuestionCircle, FaLock } from 'react-icons/fa';
@@ -18,19 +19,40 @@ import { Event } from '../Shared/Tracking';
 
 import questions from '../../data';
 
+import 'react-toggle/style.css';
 import './styles.scss';
 
 const images = require.context('../../icons', true);
 
 const Table = () => {
-  const [checked, setChecked] = useState(
+  let checkedList =
     JSON.parse(localStorage.getItem('checked')) ||
-      new Array(questions.length).fill(false),
+    new Array(questions.length).fill(false);
+
+  if (checkedList.length !== questions.length) {
+    const newCheckedList = new Array(questions.length).fill(false);
+
+    for (let i = 0; i < checkedList.length; i += 1) {
+      newCheckedList[i] = checkedList[i];
+    }
+
+    checkedList = newCheckedList;
+    window.localStorage.setItem('checked', JSON.stringify(checkedList));
+  }
+
+  const [checked, setChecked] = useState(checkedList);
+
+  const [showPatterns, setShowPatterns] = useState(
+    JSON.parse(localStorage.getItem('showPatterns')) || new Array(1).fill(true),
   );
 
   useEffect(() => {
     window.localStorage.setItem('checked', JSON.stringify(checked));
   }, [checked]);
+
+  useEffect(() => {
+    window.localStorage.setItem('showPatterns', JSON.stringify(showPatterns));
+  }, [showPatterns]);
 
   const data = React.useMemo(() => questions, []);
 
@@ -54,8 +76,6 @@ const Table = () => {
               return (
                 <input
                   type="checkbox"
-                  className="checkbox"
-                  name={cellInfo.row.original.name}
                   checked={checked[cellInfo.row.original.id]}
                   onChange={() => {
                     checked[cellInfo.row.original.id] = !checked[
@@ -108,20 +128,62 @@ const Table = () => {
             disableFilters: true,
           },
           {
-            Header: 'Pattern',
+            Header: () => {
+              return (
+                <label htmlFor="pattern-toggle">
+                  <span>Show/Hide Patterns </span>
+                  <Toggle
+                    id="pattern-toggle"
+                    defaultChecked={showPatterns[0]}
+                    icons={{
+                      checked: null,
+                      unchecked: null,
+                    }}
+                    onChange={() => {
+                      showPatterns[0] = !showPatterns[0];
+                      setShowPatterns([...showPatterns]);
+                    }}
+                  />
+                </label>
+              );
+            },
             accessor: 'pattern',
+            Cell: cellInfo => {
+              const patterns = `${cellInfo.row.original.pattern}`
+                .split(',')
+                .map(pattern => {
+                  if (showPatterns[0] || checked[cellInfo.row.original.id]) {
+                    return (
+                      <Badge key={pattern} pill>
+                        {pattern}
+                      </Badge>
+                    );
+                  }
+
+                  return (
+                    <Badge key={pattern} pill>
+                      ***
+                    </Badge>
+                  );
+                });
+
+              return <Row className="patterns">{patterns}</Row>;
+            },
+
             Filter: SelectColumnFilter,
           },
           {
             Header: 'Difficulty',
             accessor: 'difficulty',
             Cell: cellInfo => (
-              <Badge
-                className={cellInfo.row.original.difficulty.toLowerCase()}
-                pill
-              >
-                {cellInfo.row.original.difficulty}
-              </Badge>
+              <Row>
+                <Badge
+                  className={cellInfo.row.original.difficulty.toLowerCase()}
+                  pill
+                >
+                  {cellInfo.row.original.difficulty}
+                </Badge>
+              </Row>
             ),
             Filter: SelectDifficultyColumnFilter,
           },
@@ -172,9 +234,6 @@ const Table = () => {
       columns,
       data,
       defaultColumn,
-      initialState: {
-        sortBy: [{ id: 'pattern' }],
-      },
     },
     useFilters,
     useSortBy,
